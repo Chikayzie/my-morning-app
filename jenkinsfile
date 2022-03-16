@@ -1,0 +1,23 @@
+node {
+    def mvnHome = tool name: 'maven-home', type: 'maven'  
+    stage('SCM-Checkout') { 
+        git branch: 'main', credentialsId: '8ec183bf-2345-4652-8df3-44514d10c459', url: 'https://github.com/Chikayzie/my-morning-app.git' 
+    }
+    stage('mvn-clean') { 
+        sh "${mvnHome}/bin/mvn clean"
+    }
+    stage('mvn-compile') { 
+        sh "${mvnHome}/bin/mvn compile"
+    }
+    stage('mvn-test') { 
+        sh "${mvnHome}/bin/mvn test"
+    }
+    stage('mvn-package') { 
+        sh "${mvnHome}/bin/mvn package"
+    }
+    stage('Tomcat-deployment') { 
+        sshagent(['ubuntu']) {
+             sh "scp -o StrictHostKeyChecking=no target/tomcat-demo.war ubuntu@172.31.29.255:/opt/tomcat/webapps"
+        }
+    }
+}
